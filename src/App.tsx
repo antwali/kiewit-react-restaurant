@@ -43,6 +43,12 @@ export function App() {
           <option key={tag}>{tag}</option>
         ))}
       </select>
+      <br />
+      {tagFilter && (
+        <p>
+          {filteredFoods.length} food{filteredFoods.length > 1 && "s"} found.
+        </p>
+      )}
       <div className="flex flex-wrap">{filteredFoods.map(renderFood)}</div>
     </>
   );
