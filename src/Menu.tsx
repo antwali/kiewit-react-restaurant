@@ -1,21 +1,32 @@
-import { useState } from "react";
-import { Food, FoodTag, foodTags, foods } from "./food";
-import { Heading } from "./shared/Heading";
+import { useEffect, useState } from "react";
 
-export function App() {
+import { Heading } from "./shared/Heading";
+import { getFoods } from "./api/foods.service";
+import { Food, FoodTag, foodTags } from "./food.types";
+
+export function Menu() {
   const [tagFilter, setTagFilter] = useState<null | FoodTag>(null);
+  const [foods, setFoods] = useState<Food[]>([]);
+
+  useEffect(() => {
+    async function fetchFoods() {
+      const getFoodsResp = await getFoods();
+      setFoods(getFoodsResp);
+    }
+    fetchFoods();
+  }, []);
 
   const filteredFoods = foods.filter((food) => {
+    //if tagFilter != null return a | b
     return tagFilter ? food.tags.includes(tagFilter) : true;
-    // if (tagFilter === null) {
-    //   return true;
-    // }
-    // return food.tags.includes(tagFilter);
   });
 
   function renderFood(food: Food) {
     return (
-      <div key={food.id} className="m-4 p-2 bg-cyan-100 w-52 border shadow-md">
+      <div
+        key={food.id}
+        className="p-2 m-2 bg-cyan-100 w-80 border rounded shadow-md"
+      >
         <Heading tag="h2">{food.name}</Heading>
         <img
           src={`images/${food.image}`}
@@ -23,14 +34,14 @@ export function App() {
           className="max-h-36"
         />
         <p>{food.description}</p>
-        <p className="font-bold">{food.price}</p>
+        <p className="font-bold">${food.price}</p>
       </div>
     );
   }
 
   return (
     <>
-      <Heading tag="h1"> Menu</Heading>
+      <Heading tag="h1">Menu</Heading>
       <label htmlFor="tag-filter">Filter by Tag</label>
       <br />
       <select
@@ -43,7 +54,6 @@ export function App() {
           <option key={tag}>{tag}</option>
         ))}
       </select>
-      <br />
       {tagFilter && (
         <p>
           {filteredFoods.length} food{filteredFoods.length > 1 && "s"} found.
