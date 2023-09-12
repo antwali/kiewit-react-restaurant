@@ -16,6 +16,7 @@ export function Menu() {
     fetchFoods();
   }, []);
 
+  //Derived state
   const filteredFoods = foods.filter((food) => {
     //if tagFilter != null return a | b
     return tagFilter ? food.tags.includes(tagFilter) : true;
