@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { Heading } from "./shared/Heading";
-import { getFoods } from "./api/foods.service";
+import { deleteFood, getFoods } from "./api/foods.service";
+import toast from "react-hot-toast";
 import { Food, FoodTag, foodTags } from "./food.types";
 
 export function Menu() {
@@ -16,17 +16,25 @@ export function Menu() {
     fetchFoods();
   }, []);
 
-  //Derived state
+  // Derived state
   const filteredFoods = foods.filter((food) => {
-    //if tagFilter != null return a | b
     return tagFilter ? food.tags.includes(tagFilter) : true;
   });
+
+  async function handleDelete(food: Food) {
+    await deleteFood(food.id);
+    // Remove the deleted food from the list of foods
+    setFoods((prevFoods) => {
+      return prevFoods.filter((f) => f.id !== food.id);
+    });
+    toast.error(`${food.name} deleted.`);
+  }
 
   function renderFood(food: Food) {
     return (
       <div
         key={food.id}
-        className="p-2 m-2 bg-cyan-100 w-80 border rounded shadow-md"
+        className="p-2 m-2 border rounded shadow-md bg-cyan-100 w-80"
       >
         <Heading tag="h2">{food.name}</Heading>
         <img
@@ -36,6 +44,7 @@ export function Menu() {
         />
         <p>{food.description}</p>
         <p className="font-bold">${food.price}</p>
+        <button onClick={() => handleDelete(food)}>Delete</button>
       </div>
     );
   }
