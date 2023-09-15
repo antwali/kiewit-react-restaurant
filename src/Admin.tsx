@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heading } from "./shared/Heading";
 import { Input } from "./shared/Input";
-import { addFood } from "./api/foods.service";
+import { addFood, editFood, getFood } from "./api/foods.service";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
-import { NewFood } from "./food.types";
+import { Food, NewFood } from "./food.types";
 
 const newFood: NewFood = {
   name: "",
@@ -26,10 +26,25 @@ const foodFormSchema = z.object({
 type Status = "idle" | "submitting" | "submitted";
 
 export function Admin() {
-  const [food, setFood] = useState(newFood);
+  const [food, setFood] = useState<NewFood | Food>(newFood);
   const [status, setStatus] = useState<Status>("idle");
 
   const navigate = useNavigate();
+  const { foodId } = useParams();
+
+  // Derive state
+  const isEditing = Boolean(foodId);
+
+  useEffect(() => {
+    async function fetchFood() {
+      if (!foodId) return;
+      // TODO: Use Zod to validate the foodId is a number
+      const foodResponse = await getFood(Number(foodId));
+      setFood(foodResponse);
+    }
+
+    fetchFood();
+  }, [foodId]);
 
   // Validate the form on every render (every keystroke)
   const result = foodFormSchema.safeParse(food);
@@ -66,7 +81,10 @@ export function Admin() {
       toast.error("Invalid input");
       return;
     }
-    await addFood(food);
+
+    // Narrow the type by checking for the presence of an id property
+    "id" in food ? await editFood(food) : await addFood(food);
+
     toast.success("Food added!");
     navigate("/");
   }
@@ -104,7 +122,11 @@ export function Admin() {
         formIsSubmitted={formIsSubmitted}
       />
 
-      <input className="block" type="submit" value="Add Food" />
+      <input
+        className="block"
+        type="submit"
+        value={`${isEditing ? "Save" : "Add"} Food`}
+      />
     </form>
   );
 }

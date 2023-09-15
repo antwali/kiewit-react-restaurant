@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Heading } from "./shared/Heading";
 import { deleteFood, getFoods } from "./api/foods.service";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { Food, FoodTag, foodTags } from "./food.types";
 
 export function Menu() {
@@ -36,7 +37,9 @@ export function Menu() {
         key={food.id}
         className="p-2 m-2 border rounded shadow-md bg-cyan-100 w-80"
       >
-        <Heading tag="h2">{food.name}</Heading>
+        <Heading tag="h2">
+          <Link to={`/admin/${food.id}`}> {food.name}</Link>
+        </Heading>
         <img
           src={`images/${food.image}`}
           alt={food.name}
@@ -44,7 +47,12 @@ export function Menu() {
         />
         <p>{food.description}</p>
         <p className="font-bold">${food.price}</p>
-        <button onClick={() => handleDelete(food)}>Delete</button>
+        <button
+          aria-label={`Delete ${food.name}`}
+          onClick={() => handleDelete(food)}
+        >
+          Delete
+        </button>
       </div>
     );
   }
